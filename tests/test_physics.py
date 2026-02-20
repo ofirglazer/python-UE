@@ -209,6 +209,10 @@ class TestPhysicsObjectRepr:
 class TestPhysicsObjectResetCounter:
     """Tests for ID counter reset functionality."""
 
+    def setup_method(self):
+        """Reset ID counter before each test."""
+        PhysicsObject.reset_id_counter()
+
     def test_reset_counter_resets_ids(self):
         """Test that resetting counter starts IDs from 1 again."""
         obj1 = PhysicsObject(pos=(0, 0, 0), vel=(0, 0, 0))

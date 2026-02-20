@@ -12,25 +12,6 @@ from physics.object import PhysicsObject
 import config
 
 
-def make_key_state(**keys):
-    """
-    Create a pygame-style key state array for testing.
-
-    Usage:
-        keys = make_key_state(K_w=True, K_SPACE=False)
-        player.update(dt=0.1, keys_pressed=keys)
-    """
-    if not pygame.get_init():
-        pygame.init()
-
-    state = [False] * 512  # Pygame keys are < 512
-
-    for key_name, value in keys.items():
-        if hasattr(pygame, key_name):
-            key_code = getattr(pygame, key_name)
-            state[key_code] = value
-
-    return state
 
 class TestPlayerPhysicsObjectInteraction:
     """Tests for interactions between player and physics objects."""
@@ -220,13 +201,21 @@ class TestPlayerMovementIntegration:
             ({pygame.K_a: True}, 20),  # Left
         ]
 
+        # Track positions to verify movement occurred
+        positions = [initial_pos.copy()]
+        
         for keys, steps in movements:
             for _ in range(steps):
                 player.update(dt=0.1, keys_pressed=keys)
+            positions.append(player.position.copy())
 
-        # Should have moved significantly from start
-        distance = np.linalg.norm(player.position - initial_pos)
-        assert distance > 1.0
+        # Player should return close to start (square path)
+        final_distance = np.linalg.norm(player.position - initial_pos)
+        assert final_distance < 1.0  # Close to start
+        
+        # But should have moved during the path
+        max_distance = max(np.linalg.norm(pos - initial_pos) for pos in positions)
+        assert max_distance > 5.0  # Moved significantly during path
 
     def test_player_jump_and_land(self):
         """Test complete jump cycle."""

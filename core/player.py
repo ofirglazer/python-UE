@@ -5,7 +5,6 @@ This module handles player physics, movement, and input processing.
 """
 
 import numpy as np
-from typing import Dict
 import pygame
 from core.camera import Camera
 from utils.math_utils import normalize
@@ -61,13 +60,13 @@ class Player:
             dy * config.MOUSE_SENSITIVITY
         )
 
-    def update(self, dt: float, keys_pressed: Dict[int, bool]) -> None:
+    def update(self, dt: float, keys_pressed) -> None:
         """
         Update player physics and movement.
 
         Args:
             dt: Time delta in seconds
-            keys_pressed: Dictionary of key states
+            keys_pressed: Pygame key state array or dict with key states
         """
         # Calculate movement direction from input
         movement = self._calculate_movement_input(keys_pressed)
@@ -79,8 +78,9 @@ class Player:
         # Apply gravity
         self.velocity[1] += config.GRAVITY * dt
 
-        # Handle jump
-        if keys_pressed[pygame.K_SPACE] and self.on_ground:
+        # Handle jump - support both dict and array
+        jump_pressed = self._get_key_state(keys_pressed, pygame.K_SPACE)
+        if jump_pressed and self.on_ground:
             self.velocity[1] = config.JUMP_SPEED
             self.on_ground = False
 
@@ -90,12 +90,33 @@ class Player:
         # Ground collision
         self._handle_ground_collision()
 
-    def _calculate_movement_input(self, keys_pressed: Dict[int, bool]) -> np.ndarray:
+    def _get_key_state(self, keys_pressed, key):
+        """
+        Safely get key state from either dict or array.
+        
+        Args:
+            keys_pressed: Key state dict or array
+            key: Key to check
+            
+        Returns:
+            Boolean indicating if key is pressed
+        """
+        try:
+            # Try dict-style access
+            return keys_pressed.get(key, False)
+        except AttributeError:
+            # Fall back to array indexing
+            try:
+                return bool(keys_pressed[key])
+            except (IndexError, KeyError):
+                return False
+
+    def _calculate_movement_input(self, keys_pressed) -> np.ndarray:
         """
         Calculate movement vector from keyboard input.
 
         Args:
-            keys_pressed: Dictionary of key states
+            keys_pressed: Pygame key state array or dict with key states
 
         Returns:
             Movement vector [x, y, z]
@@ -107,14 +128,14 @@ class Player:
         forward[1] = 0.0
         right = self.camera.right.copy()
 
-        # WASD movement
-        if keys_pressed[pygame.K_w]:
+        # WASD movement - works with both dict and array
+        if self._get_key_state(keys_pressed, pygame.K_w):
             movement += forward
-        if keys_pressed[pygame.K_s]:
+        if self._get_key_state(keys_pressed, pygame.K_s):
             movement -= forward
-        if keys_pressed[pygame.K_d]:
+        if self._get_key_state(keys_pressed, pygame.K_d):
             movement += right
-        if keys_pressed[pygame.K_a]:
+        if self._get_key_state(keys_pressed, pygame.K_a):
             movement -= right
 
         # Normalize and scale

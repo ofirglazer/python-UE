@@ -53,7 +53,7 @@ class GameEngine:
         self.player: Player = Player()
         self.physics_objects: List[PhysicsObject] = []
         self.scene_renderer: SceneRenderer = SceneRenderer()
-        self.hud: None  # Don't create yet
+        self.hud: HUD = None  # Will be initialized after pygame.init()
 
         # Timing
         self.shoot_cooldown: float = 0.0
@@ -65,7 +65,6 @@ class GameEngine:
         """Initialize Pygame, OpenGL, and all subsystems."""
         # Initialize Pygame
         pygame.init()
-        self.hud = HUD()  # Now pygame is ready
         pygame.display.set_caption(config.WINDOW_TITLE)
         pygame.display.set_mode(
             (config.WINDOW_WIDTH, config.WINDOW_HEIGHT),
@@ -75,6 +74,9 @@ class GameEngine:
         # Hide cursor and grab mouse for FPS controls
         pygame.mouse.set_visible(False)
         pygame.event.set_grab(True)
+
+        # Initialize HUD (requires pygame to be initialized for fonts)
+        self.hud = HUD()
 
         # Initialize OpenGL
         self._init_opengl()

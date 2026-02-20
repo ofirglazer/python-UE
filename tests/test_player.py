@@ -11,25 +11,6 @@ from core.player import Player
 import config
 
 
-def make_key_state(**keys):
-    """
-    Create a pygame-style key state array for testing.
-
-    Usage:
-        keys = make_key_state(K_w=True, K_SPACE=False)
-        player.update(dt=0.1, keys_pressed=keys)
-    """
-    if not pygame.get_init():
-        pygame.init()
-
-    state = [False] * 512  # Pygame keys are < 512
-
-    for key_name, value in keys.items():
-        if hasattr(pygame, key_name):
-            key_code = getattr(pygame, key_name)
-            state[key_code] = value
-
-    return state
 
 class TestPlayerInitialization:
     """Tests for Player initialization."""
