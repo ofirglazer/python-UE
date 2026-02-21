@@ -15,8 +15,8 @@ from typing import Tuple
 
 @dataclass(frozen=True)
 class DisplayConfig:
-    width: int = 1920
-    height: int = 1080
+    width: int = 1024  # 1920
+    height: int = 1080  # 1080
     title: str = (
         "UE-Inspired 3D Simulation | WASD+Mouse | F=Shoot G=Crate ESC=Quit"
     )
@@ -89,7 +89,7 @@ class GameplayConfig:
 
 @dataclass(frozen=True)
 class RenderingConfig:
-    target_fps: int = 120
+    target_fps: int = 10  # 120
     fps_sample_size: int = 20  # Number of frames to average for FPS display
 
 

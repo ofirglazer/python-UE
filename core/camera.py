@@ -53,9 +53,16 @@ class Camera:
         yaw_rad = math.radians(self.yaw)
         pitch_rad = math.radians(self.pitch)
 
+        # In OpenGL: -Z is forward, so we use negative cos for Z
+        # world axes in OpenGL:
+        # In OpenGL's right-handed coordinate system with the camera looking down -Z:
+        #
+        # yaw = 0°: forward = (0, 0, -1) — looking into screen (negative Z)
+        # yaw = -90° (turned right): forward = (-1, 0, 0) — looking left along negative X
+        # yaw = 90° (turned left): forward = (1, 0, 0) — looking right along positive X
         return np.array([
-            math.sin(yaw_rad) * math.cos(pitch_rad),
-            -math.sin(pitch_rad),
+            -math.sin(yaw_rad) * math.cos(pitch_rad),
+            math.sin(pitch_rad),
             -math.cos(yaw_rad) * math.cos(pitch_rad)
         ])
 
@@ -71,7 +78,7 @@ class Camera:
         return np.array([
             math.cos(yaw_rad),
             0.0,
-            math.sin(yaw_rad)
+            -math.sin(yaw_rad)
         ])
 
     @property
@@ -90,11 +97,12 @@ class Camera:
 
         Args:
             delta_yaw: Change in horizontal rotation (degrees)
-            delta_pitch: Change in vertical rotation (degrees)
+            delta_pitch: Change in vertical rotation (degrees), inverted between pygame and PyOpenGL
         """
-        self.yaw += delta_yaw
+        # Moving mouse right → turn right (negative yaw in our system)
+        self.yaw -= delta_yaw
         self.pitch = clamp(
-            self.pitch + delta_pitch,
+            self.pitch - delta_pitch,
             -self.config.camera.pitch_limit,
             self.config.camera.pitch_limit
         )
