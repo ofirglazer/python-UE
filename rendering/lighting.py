@@ -6,10 +6,10 @@ implementing a two-light setup similar to Unreal Engine's default lighting.
 """
 
 from OpenGL.GL import *
-import config
+from config import GameConfig
 
 
-def setup_lighting() -> None:
+def setup_lighting(config: GameConfig) -> None:
     """
     Configure OpenGL lighting system.
 
@@ -28,20 +28,20 @@ def setup_lighting() -> None:
 
     # Configure main directional light (key light)
     glEnable(GL_LIGHT0)
-    glLightfv(GL_LIGHT0, GL_POSITION, config.LIGHT0_POSITION)
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, config.LIGHT0_DIFFUSE)
-    glLightfv(GL_LIGHT0, GL_AMBIENT, config.LIGHT0_AMBIENT)
-    glLightfv(GL_LIGHT0, GL_SPECULAR, config.LIGHT0_SPECULAR)
+    glLightfv(GL_LIGHT0, GL_POSITION, config.lighting.light0_position)
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, config.lighting.light0_diffuse)
+    glLightfv(GL_LIGHT0, GL_AMBIENT, config.lighting.light0_ambient)
+    glLightfv(GL_LIGHT0, GL_SPECULAR, config.lighting.light0_specular)
 
     # Configure fill light (cool)
     glEnable(GL_LIGHT1)
-    glLightfv(GL_LIGHT1, GL_POSITION, config.LIGHT1_POSITION)
-    glLightfv(GL_LIGHT1, GL_DIFFUSE, config.LIGHT1_DIFFUSE)
-    glLightfv(GL_LIGHT1, GL_AMBIENT, config.LIGHT1_AMBIENT)
+    glLightfv(GL_LIGHT1, GL_POSITION, config.lighting.light1_position)
+    glLightfv(GL_LIGHT1, GL_DIFFUSE, config.lighting.light1_diffuse)
+    glLightfv(GL_LIGHT1, GL_AMBIENT, config.lighting.light1_ambient)
 
     # Configure material properties for specular highlights
-    glMaterialfv(GL_FRONT, GL_SPECULAR, config.MATERIAL_SPECULAR)
-    glMaterialf(GL_FRONT, GL_SHININESS, config.MATERIAL_SHININESS)
+    glMaterialfv(GL_FRONT, GL_SPECULAR, config.lighting.material_specular)
+    glMaterialf(GL_FRONT, GL_SHININESS, config.lighting.material_shininess)
 
 
 def disable_lighting() -> None:

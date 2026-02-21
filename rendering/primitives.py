@@ -8,7 +8,6 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from typing import Tuple
 
-import config
 from config import GameConfig
 
 

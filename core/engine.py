@@ -51,9 +51,9 @@ class GameEngine:
         self.last_time: float = 0.0
 
         # Core systems
-        self.player: Player = Player()
+        self.player: Player = Player(self.config)
         self.physics_objects: List[PhysicsObject] = []
-        self.scene_renderer: SceneRenderer = SceneRenderer()
+        self.scene_renderer: SceneRenderer = SceneRenderer(self.config)
         self.hud: HUD = None  # Will be initialized after pygame.init()
 
         # Timing
@@ -66,9 +66,9 @@ class GameEngine:
         """Initialize Pygame, OpenGL, and all subsystems."""
         # Initialize Pygame
         pygame.init()
-        pygame.display.set_caption(config.WINDOW_TITLE)
+        pygame.display.set_caption(self.config.display.title)
         pygame.display.set_mode(
-            (config.WINDOW_WIDTH, config.WINDOW_HEIGHT),
+            (self.config.display.width, self.config.display.height),
             DOUBLEBUF | OPENGL
         )
 
@@ -77,7 +77,7 @@ class GameEngine:
         pygame.event.set_grab(True)
 
         # Initialize HUD (requires pygame to be initialized for fonts)
-        self.hud = HUD()
+        self.hud = HUD(self.config)
 
         # Initialize OpenGL
         self._init_opengl()
@@ -88,16 +88,16 @@ class GameEngine:
     def _init_opengl(self) -> None:
         """Configure OpenGL rendering state."""
         # Viewport
-        glViewport(0, 0, config.WINDOW_WIDTH, config.WINDOW_HEIGHT)
+        glViewport(0, 0, self.config.display.width, self.config.display.height)
 
         # Projection matrix
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
         gluPerspective(
-            config.FIELD_OF_VIEW,
-            config.WINDOW_WIDTH / config.WINDOW_HEIGHT,
-            config.NEAR_PLANE,
-            config.FAR_PLANE
+            self.config.camera.field_of_view,
+            self.config.display.width / self.config.display.height,
+            self.config.camera.near_plane,
+            self.config.camera.far_plane
         )
         glMatrixMode(GL_MODELVIEW)
 
@@ -109,7 +109,7 @@ class GameEngine:
         glEnable(GL_NORMALIZE)
 
         # Lighting
-        setup_lighting()
+        setup_lighting(self.config)
 
     def run(self) -> None:
         """Main game loop."""

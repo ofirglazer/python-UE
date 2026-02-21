@@ -7,7 +7,6 @@ This module handles player physics, movement, and input processing.
 import numpy as np
 import pygame
 
-import config
 from core.camera import Camera
 from utils.math_utils import normalize
 from config import GameConfig

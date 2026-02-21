@@ -8,7 +8,6 @@ including sphere-sphere, sphere-ground, and collision response.
 import numpy as np
 from typing import Tuple, Optional
 
-import config
 from utils.math_utils import vector_distance, normalize, dot_product
 from config import GameConfig
 

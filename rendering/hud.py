@@ -10,7 +10,7 @@ import numpy as np
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from typing import List, Tuple
-import config
+from config import GameConfig
 
 
 class HUD:
@@ -22,16 +22,18 @@ class HUD:
         font_small: Small font for secondary information
     """
 
-    def __init__(self):
+    def __init__(self, config: GameConfig):
+        self.config = config
+
         """Initialize HUD with fonts."""
         self.font_big = pygame.font.SysFont(
-            config.HUD_FONT_NAME,
-            config.HUD_FONT_BIG_SIZE,
+            self.config.hud.font_name,
+            self.config.hud.font_big_size,
             bold=True
         )
         self.font_small = pygame.font.SysFont(
-            config.HUD_FONT_NAME,
-            config.HUD_FONT_SMALL_SIZE
+            self.config.hud.font_name,
+            self.config.hud.font_small_size
         )
 
     def render(
