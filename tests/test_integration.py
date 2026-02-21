@@ -11,7 +11,9 @@ from core.player import Player
 from physics.object import PhysicsObject
 from config import GameConfig
 
-
+@pytest.fixture
+def test_config():
+    return GameConfig()
 
 class TestPlayerPhysicsObjectInteraction:
     """Tests for interactions between player and physics objects."""
@@ -20,18 +22,19 @@ class TestPlayerPhysicsObjectInteraction:
         """Reset state before each test."""
         PhysicsObject.reset_id_counter()
 
-    def test_player_shoots_sphere_creates_object(self):
+    def test_player_shoots_sphere_creates_object(self, test_config):
         """Test complete workflow of shooting a sphere."""
-        player = Player()
+        player = Player(test_config)
         spawn_pos, velocity = player.shoot_sphere()
 
         # Create object with returned values
         sphere = PhysicsObject(
+            test_config,
             pos=spawn_pos,
             vel=velocity,
             shape="sphere",
-            size=config.SPHERE_DEFAULT_RADIUS,
-            mass=config.SPHERE_DEFAULT_MASS
+            size=test_config.sphere.default_radius,
+            mass=test_config.sphere.default_mass
         )
 
         assert sphere.alive
@@ -39,16 +42,18 @@ class TestPlayerPhysicsObjectInteraction:
         # Sphere should have forward velocity
         assert np.linalg.norm(sphere.vel) > 0
 
-    def test_multiple_objects_physics_interaction(self):
+    def test_multiple_objects_physics_interaction(self, test_config):
         """Test multiple objects interacting through physics."""
         # Create two spheres on collision course
         obj1 = PhysicsObject(
+            test_config,
             pos=(0, 5, 0),
             vel=(5, 0, 0),
             shape="sphere",
             size=1.0
         )
         obj2 = PhysicsObject(
+            test_config,
             pos=(3, 5, 0),
             vel=(-5, 0, 0),
             shape="sphere",
@@ -74,10 +79,11 @@ class TestCompleteGameLoopSimulation:
         """Reset state before each test."""
         PhysicsObject.reset_id_counter()
 
-    def test_object_lifecycle(self):
+    def test_object_lifecycle(self, test_config):
         """Test complete lifecycle of a physics object."""
         # Create object high up
         obj = PhysicsObject(
+            test_config,
             pos=(0, 50, 0),
             vel=(0, 0, 0),
             shape="sphere",
@@ -99,15 +105,16 @@ class TestCompleteGameLoopSimulation:
         # Age should have increased
         assert obj.age > 0
 
-    def test_scene_with_player_and_objects(self):
+    def test_scene_with_player_and_objects(self, test_config):
         """Test a scene with player movement and physics objects."""
-        player = Player()
+        player = Player(test_config)
         objects = []
 
         # Spawn some objects
         for i in range(5):
             spawn_pos, velocity = player.shoot_sphere()
             obj = PhysicsObject(
+                test_config,
                 pos=spawn_pos,
                 vel=velocity,
                 shape="sphere",
@@ -140,10 +147,11 @@ class TestPhysicsConsistency:
         """Reset state before each test."""
         PhysicsObject.reset_id_counter()
 
-    def test_energy_dissipation_over_time(self):
+    def test_energy_dissipation_over_time(self, test_config):
         """Test that energy dissipates over time due to friction and restitution."""
         # Create bouncing sphere
         obj = PhysicsObject(
+            test_config,
             pos=(0, 10, 0),
             vel=(0, 0, 0),
             shape="sphere",
@@ -161,13 +169,14 @@ class TestPhysicsConsistency:
         if len(heights) > 2:
             assert heights[-1] < heights[0]
 
-    def test_no_objects_pass_through_ground(self):
+    def test_no_objects_pass_through_ground(self, test_config):
         """Test that no objects pass through the ground plane."""
         objects = []
 
         # Create multiple objects at various positions
         for i in range(10):
             obj = PhysicsObject(
+                test_config,
                 pos=(i * 2, 20, 0),
                 vel=(0, -20, 0),
                 shape="sphere",
@@ -182,15 +191,15 @@ class TestPhysicsConsistency:
 
         # All objects should be at or above ground
         for obj in objects:
-            assert obj.pos[1] >= config.GROUND_LEVEL + obj.size - 0.01
+            assert obj.pos[1] >= test_config.world.ground_level + obj.size - 0.01
 
 
 class TestPlayerMovementIntegration:
     """Tests for complete player movement scenarios."""
 
-    def test_player_exploration_path(self):
+    def test_player_exploration_path(self, test_config):
         """Test player moving in a complete path."""
-        player = Player()
+        player = Player(test_config)
         initial_pos = player.position.copy()
 
         # Move in a square pattern
@@ -217,12 +226,12 @@ class TestPlayerMovementIntegration:
         max_distance = max(np.linalg.norm(pos - initial_pos) for pos in positions)
         assert max_distance > 5.0  # Moved significantly during path
 
-    def test_player_jump_and_land(self):
+    def test_player_jump_and_land(self, test_config):
         """Test complete jump cycle."""
-        player = Player()
+        player = Player(test_config)
 
         # Ensure on ground
-        player.position[1] = config.PLAYER_HEIGHT
+        player.position[1] = test_config.player.height
         player.update(dt=0.1, keys_pressed={})
         assert player.on_ground
 
@@ -249,13 +258,14 @@ class TestStressScenarios:
         """Reset state before each test."""
         PhysicsObject.reset_id_counter()
 
-    def test_many_objects_performance(self):
+    def test_many_objects_performance(self, test_config):
         """Test simulation with many physics objects."""
         objects = []
 
         # Create many objects
         for i in range(50):
             obj = PhysicsObject(
+                test_config,
                 pos=(i % 10, 10 + i % 5, i // 10),
                 vel=(0, 0, 0),
                 shape="sphere",
@@ -273,20 +283,21 @@ class TestStressScenarios:
         # Most objects should still be alive
         assert len(objects) > 40
 
-    def test_max_objects_limit(self):
+    def test_max_objects_limit(self, test_config):
         """Test that object limit is enforced."""
         objects = []
 
         # Create more than max
-        for i in range(config.MAX_OBJECTS + 50):
+        for i in range(test_config.gameplay.max_objects + 50):
             obj = PhysicsObject(
+                test_config,
                 pos=(0, 10, 0),
                 vel=(0, 0, 0)
             )
             objects.append(obj)
 
         # Trim to max
-        if len(objects) > config.MAX_OBJECTS:
-            objects = objects[-config.MAX_OBJECTS:]
+        if len(objects) > test_config.gameplay.max_objects:
+            objects = objects[-test_config.gameplay.max_objects:]
 
-        assert len(objects) == config.MAX_OBJECTS
+        assert len(objects) == test_config.gameplay.max_objects
