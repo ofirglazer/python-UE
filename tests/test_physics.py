@@ -9,6 +9,7 @@ import numpy as np
 from physics.object import PhysicsObject
 from config import GameConfig
 
+
 @pytest.fixture
 def test_config():
     return GameConfig()

@@ -11,9 +11,11 @@ from core.player import Player
 from physics.object import PhysicsObject
 from config import GameConfig
 
+
 @pytest.fixture
 def test_config():
     return GameConfig()
+
 
 class TestPlayerPhysicsObjectInteraction:
     """Tests for interactions between player and physics objects."""

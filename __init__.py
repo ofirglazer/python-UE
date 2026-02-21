@@ -6,7 +6,7 @@ featuring first-person controls, physics objects, and real-time rendering.
 """
 
 __version__ = "1.0.0"
-__author__ = "Claude"
+__author__ = "Ofir Glazer"
 
 from core import Camera, Player, SceneRenderer
 from physics import PhysicsObject

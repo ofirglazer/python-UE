@@ -35,7 +35,7 @@ def detect_sphere_sphere_collision(
     distance = np.linalg.norm(diff)
     min_distance = radius1 + radius2
 
-    if distance < min_distance and distance > 1e-6:
+    if min_distance > distance > 1e-6:
         normal = diff / distance
         penetration = min_distance - distance
         return True, normal, penetration

@@ -123,7 +123,6 @@ def draw_ground(
     if grid_color is None:
         grid_color = config.environment_colors.grid_color
 
-
     ground_y = config.world.ground_level
 
     # Draw ground plane

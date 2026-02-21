@@ -18,7 +18,7 @@ class SceneRenderer:
     part of the static scene environment.
     """
 
-    def __init__(self, config):
+    def __init__(self, config: GameConfig) -> None:
         """Initialize scene renderer with static objects."""
         self.config = config
         self.static_objects = self.config.static_scene.objects
