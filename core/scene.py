@@ -7,7 +7,7 @@ This module handles rendering of static scene objects like crates and pillars.
 from OpenGL.GL import *
 from typing import Tuple
 from rendering.primitives import draw_box, draw_cylinder
-import config
+from config import GameConfig
 
 
 class SceneRenderer:
@@ -18,9 +18,10 @@ class SceneRenderer:
     part of the static scene environment.
     """
 
-    def __init__(self):
+    def __init__(self, config):
         """Initialize scene renderer with static objects."""
-        self.static_objects = config.STATIC_OBJECTS
+        self.config = config
+        self.static_objects = self.config.static_scene.objects
 
     def render(self) -> None:
         """Render all static scene objects."""

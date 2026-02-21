@@ -10,7 +10,7 @@ import numpy as np
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from typing import List, Tuple
-import config
+from config import GameConfig
 
 
 class HUD:
@@ -22,16 +22,18 @@ class HUD:
         font_small: Small font for secondary information
     """
 
-    def __init__(self):
+    def __init__(self, config: GameConfig):
+        self.config = config
+
         """Initialize HUD with fonts."""
         self.font_big = pygame.font.SysFont(
-            config.HUD_FONT_NAME,
-            config.HUD_FONT_BIG_SIZE,
+            self.config.hud.font_name,
+            self.config.hud.font_big_size,
             bold=True
         )
         self.font_small = pygame.font.SysFont(
-            config.HUD_FONT_NAME,
-            config.HUD_FONT_SMALL_SIZE
+            self.config.hud.font_name,
+            self.config.hud.font_small_size
         )
 
     def render(
@@ -84,21 +86,21 @@ class HUD:
 
         # Draw crosshair lines
         cx, cy = width // 2, height // 2
-        glColor3f(*config.HUD_CROSSHAIR_COLOR)
-        glLineWidth(config.HUD_CROSSHAIR_WIDTH)
+        glColor3f(*self.config.hud.crosshair_color)
+        glLineWidth(self.config.hud.crosshair_width)
 
         glBegin(GL_LINES)
         # Horizontal lines
-        glVertex2f(cx - config.HUD_CROSSHAIR_SIZE, cy)
-        glVertex2f(cx - config.HUD_CROSSHAIR_GAP, cy)
-        glVertex2f(cx + config.HUD_CROSSHAIR_GAP, cy)
-        glVertex2f(cx + config.HUD_CROSSHAIR_SIZE, cy)
+        glVertex2f(cx - self.config.hud.crosshair_size, cy)
+        glVertex2f(cx - self.config.hud.crosshair_gap, cy)
+        glVertex2f(cx + self.config.hud.crosshair_gap, cy)
+        glVertex2f(cx + self.config.hud.crosshair_size, cy)
 
         # Vertical lines
-        glVertex2f(cx, cy - config.HUD_CROSSHAIR_SIZE)
-        glVertex2f(cx, cy - config.HUD_CROSSHAIR_GAP)
-        glVertex2f(cx, cy + config.HUD_CROSSHAIR_GAP)
-        glVertex2f(cx, cy + config.HUD_CROSSHAIR_SIZE)
+        glVertex2f(cx, cy - self.config.hud.crosshair_size)
+        glVertex2f(cx, cy - self.config.hud.crosshair_gap)
+        glVertex2f(cx, cy + self.config.hud.crosshair_gap)
+        glVertex2f(cx, cy + self.config.hud.crosshair_size)
         glEnd()
 
         # Restore matrices
@@ -158,17 +160,17 @@ class HUD:
         ]
 
         # Render each line
-        y_offset = config.HUD_TEXT_OFFSET_Y
+        y_offset = self.config.hud.text_offset_y
         for font, text, color in lines:
             if text:
                 surface = font.render(text, True, color)
                 self._draw_text_surface(
                     surface,
-                    config.HUD_TEXT_OFFSET_X,
+                    self.config.hud.text_offset_x,
                     y_offset,
                     height
                 )
-            y_offset += font.get_height() + config.HUD_TEXT_SPACING
+            y_offset += font.get_height() + self.config.hud.text_spacing
 
         # Restore matrices
         glMatrixMode(GL_PROJECTION)

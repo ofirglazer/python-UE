@@ -6,11 +6,13 @@ Run this file to start the simulation:
 """
 
 from core.engine import GameEngine
+from config import GameConfig
 
 
 def main() -> None:
     """Initialize and run the game engine."""
-    engine = GameEngine()
+    config = GameConfig()
+    engine = GameEngine(config)
     engine.initialize()
     engine.run()
 

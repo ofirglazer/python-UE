@@ -7,8 +7,9 @@ including sphere-sphere, sphere-ground, and collision response.
 
 import numpy as np
 from typing import Tuple, Optional
+
 from utils.math_utils import vector_distance, normalize, dot_product
-import config
+from config import GameConfig
 
 
 def detect_sphere_sphere_collision(
@@ -43,9 +44,10 @@ def detect_sphere_sphere_collision(
 
 
 def detect_sphere_ground_collision(
+    config: GameConfig,
     pos: np.ndarray,
     radius: float,
-    ground_level: float = config.GROUND_LEVEL
+    ground_level: float | None = None
 ) -> Tuple[bool, float]:
     """
     Detect collision between a sphere and the ground plane.
@@ -58,6 +60,9 @@ def detect_sphere_ground_collision(
     Returns:
         Tuple of (is_colliding, penetration_depth)
     """
+    if ground_level is None:
+        ground_level = config.world.ground_level
+
     bottom = pos[1] - radius
     if bottom <= ground_level:
         penetration = ground_level - bottom
@@ -66,6 +71,7 @@ def detect_sphere_ground_collision(
 
 
 def resolve_sphere_sphere_collision(
+    config: GameConfig,
     pos1: np.ndarray,
     vel1: np.ndarray,
     mass1: float,
@@ -74,7 +80,7 @@ def resolve_sphere_sphere_collision(
     mass2: float,
     normal: np.ndarray,
     penetration: float,
-    restitution: float = config.RESTITUTION
+    restitution: float | None = None
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Resolve collision between two spheres using impulse-based physics.
@@ -93,6 +99,9 @@ def resolve_sphere_sphere_collision(
     Returns:
         Tuple of (new_pos1, new_vel1, new_pos2, new_vel2)
     """
+    if restitution is None:
+        restitution = config.physics.restitution
+
     # Separate objects
     new_pos1 = pos1 + normal * penetration * 0.5
     new_pos2 = pos2 - normal * penetration * 0.5
@@ -120,12 +129,13 @@ def resolve_sphere_sphere_collision(
 
 
 def resolve_ground_collision(
+    config: GameConfig,
     pos: np.ndarray,
     vel: np.ndarray,
     radius: float,
-    ground_level: float = config.GROUND_LEVEL,
-    restitution: float = config.RESTITUTION,
-    friction: float = config.FRICTION
+    ground_level: float | None = None,
+    restitution: float | None = None,
+    friction: float | None = None
 ) -> Tuple[np.ndarray, np.ndarray, bool]:
     """
     Resolve collision with ground plane.
@@ -141,6 +151,13 @@ def resolve_ground_collision(
     Returns:
         Tuple of (new_position, new_velocity, is_on_ground)
     """
+    if ground_level is None:
+        ground_level = config.world.ground_level
+    if restitution is None:
+        restitution = config.physics.restitution
+    if friction is None:
+        friction = config.physics.friction
+
     new_pos = pos.copy()
     new_vel = vel.copy()
     is_on_ground = False

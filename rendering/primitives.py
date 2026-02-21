@@ -7,13 +7,15 @@ This module provides functions for rendering basic 3D shapes used in the simulat
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from typing import Tuple
-import config
+
+from config import GameConfig
 
 
 def draw_sphere(
+    config: GameConfig,
     radius: float,
-    slices: int = config.SPHERE_SLICES,
-    stacks: int = config.SPHERE_STACKS
+    slices: int | None = None,
+    stacks: int | None = None
 ) -> None:
     """
     Draw a sphere using OpenGL quadrics.
@@ -23,6 +25,11 @@ def draw_sphere(
         slices: Number of subdivisions around Z-axis
         stacks: Number of subdivisions along Z-axis
     """
+    if slices is None:
+        slices = config.sphere.slices
+    if stacks is None:
+        stacks = config.sphere.stacks
+
     quadric = gluNewQuadric()
     gluQuadricNormals(quadric, GLU_SMOOTH)
     gluSphere(quadric, radius, slices, stacks)
@@ -92,10 +99,11 @@ def draw_cylinder(
 
 
 def draw_ground(
-    size: int = config.GROUND_SIZE,
-    grid_step: int = config.GROUND_GRID_STEP,
-    ground_color: Tuple[float, float, float] = config.GROUND_COLOR,
-    grid_color: Tuple[float, float, float] = config.GRID_COLOR
+    config: GameConfig,
+    size: int | None = None,
+    grid_step: int | None = None,
+    ground_color: Tuple[float, float, float] | None = None,
+    grid_color: Tuple[float, float, float] | None = None
 ) -> None:
     """
     Draw ground plane with grid lines.
@@ -106,7 +114,17 @@ def draw_ground(
         ground_color: RGB color for ground surface
         grid_color: RGB color for grid lines
     """
-    ground_y = config.GROUND_LEVEL
+    if size is None:
+        size = config.world.ground_size
+    if grid_step is None:
+        grid_step = config.world.ground_grid_step
+    if ground_color is None:
+        ground_color = config.environment_colors.ground_color
+    if grid_color is None:
+        grid_color = config.environment_colors.grid_color
+
+
+    ground_y = config.world.ground_level
 
     # Draw ground plane
     glDisable(GL_LIGHTING)
@@ -138,8 +156,9 @@ def draw_ground(
 
 
 def draw_skybox(
-    horizon_color: Tuple[float, float, float] = config.SKY_HORIZON_COLOR,
-    zenith_color: Tuple[float, float, float] = config.SKY_ZENITH_COLOR
+    config: GameConfig,
+    horizon_color: Tuple[float, float, float] | None = None,
+    zenith_color: Tuple[float, float, float] | None = None
 ) -> None:
     """
     Draw a gradient skybox using a fullscreen quad.
@@ -148,6 +167,11 @@ def draw_skybox(
         horizon_color: RGB color at horizon
         zenith_color: RGB color at zenith (top of sky)
     """
+    if horizon_color is None:
+        horizon_color = config.environment_colors.sky_horizon_color
+    if zenith_color is None:
+        zenith_color = config.environment_colors.sky_zenith_color
+
     glDisable(GL_LIGHTING)
     glDisable(GL_DEPTH_TEST)
 
