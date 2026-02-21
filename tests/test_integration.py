@@ -9,7 +9,7 @@ import numpy as np
 import pygame
 from core.player import Player
 from physics.object import PhysicsObject
-import config
+from config import GameConfig
 
 
 

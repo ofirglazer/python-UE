@@ -54,7 +54,7 @@ class GameEngine:
         self.player: Player = Player(self.config)
         self.physics_objects: List[PhysicsObject] = []
         self.scene_renderer: SceneRenderer = SceneRenderer(self.config)
-        self.hud: HUD = None  # Will be initialized after pygame.init()
+        self.hud: HUD | None = None  # Will be initialized after pygame.init()
 
         # Timing
         self.shoot_cooldown: float = 0.0
@@ -118,7 +118,7 @@ class GameEngine:
         while self.running:
             # Calculate time delta
             current_time = time.time()
-            dt = min(current_time - self.last_time, config.MAX_PHYSICS_DELTA)
+            dt = min(current_time - self.last_time, self.config.physics.max_physics_delta)
             self.last_time = current_time
 
             # Update FPS counter
@@ -137,7 +137,7 @@ class GameEngine:
             self._render()
 
             # Frame rate limiting
-            self.clock.tick(config.TARGET_FPS)
+            self.clock.tick(self.config.rendering.target_fps)
 
         # Cleanup
         pygame.quit()
@@ -153,7 +153,7 @@ class GameEngine:
             self.fps_accumulator += 1.0 / dt
             self.fps_count += 1
 
-        if self.fps_count >= config.FPS_SAMPLE_SIZE:
+        if self.fps_count >= self.config.rendering.fps_sample_size:
             self.fps_display = self.fps_accumulator / self.fps_count
             self.fps_accumulator = 0.0
             self.fps_count = 0
@@ -198,26 +198,28 @@ class GameEngine:
     def _shoot_sphere(self) -> None:
         """Shoot a physics sphere from player position."""
         spawn_pos, velocity = self.player.shoot_sphere()
-        color = random.choice(config.SPHERE_COLORS)
+        color = random.choice(self.config.sphere.colors)
 
         sphere = PhysicsObject(
+            self.config,
             pos=spawn_pos,
             vel=velocity,
             shape="sphere",
-            size=config.SPHERE_DEFAULT_RADIUS,
+            size=self.config.sphere.default_radius,
             color=color,
-            mass=config.SPHERE_DEFAULT_MASS
+            mass=self.config.sphere.default_mass
         )
         self.physics_objects.append(sphere)
-        self.shoot_cooldown = config.SHOOT_COOLDOWN
+        self.shoot_cooldown = self.config.gameplay.shoot_cooldown
 
     def _spawn_crate(self) -> None:
         """Spawn a physics crate at crosshair location."""
         target_pos = self.player.get_crosshair_target()
-        color = random.choice(config.CRATE_COLORS)
-        size = random.uniform(config.CRATE_MIN_SIZE, config.CRATE_MAX_SIZE)
+        color = random.choice(self.config.crate.colors)
+        size = random.uniform(self.config.crate.min_size, self.config.crate.max_size)
 
         crate = PhysicsObject(
+            self.config,
             pos=target_pos,
             vel=[
                 random.uniform(-2, 2),
@@ -227,7 +229,7 @@ class GameEngine:
             shape="box",
             size=size,
             color=color,
-            mass=config.CRATE_MASS
+            mass=self.config.crate.mass
         )
         self.physics_objects.append(crate)
 
@@ -253,8 +255,8 @@ class GameEngine:
         self.physics_objects = [obj for obj in alive_objects if obj.alive]
 
         # Limit total objects
-        if len(self.physics_objects) > config.MAX_OBJECTS:
-            self.physics_objects = self.physics_objects[-config.MAX_OBJECTS:]
+        if len(self.physics_objects) > self.config.gameplay.max_objects:
+            self.physics_objects = self.physics_objects[-self.config.gameplay.max_objects:]
 
     def _render(self) -> None:
         """Render the current frame."""
@@ -263,13 +265,13 @@ class GameEngine:
         glLoadIdentity()
 
         # Render skybox (before camera transform)
-        draw_skybox()
+        draw_skybox(self.config)
 
         # Apply camera transformation
         self.player.camera.apply_to_opengl()
 
         # Render ground
-        draw_ground()
+        draw_ground(self.config)
 
         # Render static scene
         self.scene_renderer.render()
@@ -279,8 +281,8 @@ class GameEngine:
 
         # Render HUD
         self.hud.render(
-            config.WINDOW_WIDTH,
-            config.WINDOW_HEIGHT,
+            self.config.display.width,
+            self.config.display.height,
             self.fps_display,
             len(self.physics_objects),
             self.player.position
@@ -297,7 +299,7 @@ class GameEngine:
             glColor3fv(obj.color)
 
             if obj.shape == "sphere":
-                draw_sphere(obj.size)
+                draw_sphere(self.config, obj.size)
             else:  # box
                 glRotatef(obj.rot[0], 1, 0, 0)
                 glRotatef(obj.rot[1], 0, 1, 0)

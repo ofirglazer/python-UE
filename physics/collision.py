@@ -44,6 +44,7 @@ def detect_sphere_sphere_collision(
 
 
 def detect_sphere_ground_collision(
+    config: GameConfig,
     pos: np.ndarray,
     radius: float,
     ground_level: float | None = None
@@ -60,7 +61,7 @@ def detect_sphere_ground_collision(
         Tuple of (is_colliding, penetration_depth)
     """
     if ground_level is None:
-        ground_level = config.WorldConfig.ground_level
+        ground_level = config.world.ground_level
 
     bottom = pos[1] - radius
     if bottom <= ground_level:
@@ -70,6 +71,7 @@ def detect_sphere_ground_collision(
 
 
 def resolve_sphere_sphere_collision(
+    config: GameConfig,
     pos1: np.ndarray,
     vel1: np.ndarray,
     mass1: float,
@@ -98,7 +100,7 @@ def resolve_sphere_sphere_collision(
         Tuple of (new_pos1, new_vel1, new_pos2, new_vel2)
     """
     if restitution is None:
-        restitution = config.PhysicsConfig.restitution
+        restitution = config.physics.restitution
 
     # Separate objects
     new_pos1 = pos1 + normal * penetration * 0.5
@@ -127,6 +129,7 @@ def resolve_sphere_sphere_collision(
 
 
 def resolve_ground_collision(
+    config: GameConfig,
     pos: np.ndarray,
     vel: np.ndarray,
     radius: float,
@@ -149,11 +152,11 @@ def resolve_ground_collision(
         Tuple of (new_position, new_velocity, is_on_ground)
     """
     if ground_level is None:
-        ground_level = config.WorldConfig.ground_level
+        ground_level = config.world.ground_level
     if restitution is None:
-        restitution = config.PhysicsConfig.restitution
+        restitution = config.physics.restitution
     if friction is None:
-        friction = config.PhysicsConfig.friction
+        friction = config.physics.friction
 
     new_pos = pos.copy()
     new_vel = vel.copy()

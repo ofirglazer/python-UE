@@ -14,7 +14,7 @@ from physics.collision import (
     resolve_sphere_sphere_collision,
     resolve_ground_collision,
 )
-import config
+from config import GameConfig
 
 
 ShapeType = Literal["sphere", "box"]
@@ -43,6 +43,7 @@ class PhysicsObject:
 
     def __init__(
         self,
+        config: GameConfig,
         pos: Tuple[float, float, float],
         vel: Tuple[float, float, float],
         shape: ShapeType = "sphere",
@@ -62,6 +63,7 @@ class PhysicsObject:
             mass: Mass in kilograms
         """
         PhysicsObject._uid_counter += 1
+        self.config = config
         self.id: int = PhysicsObject._uid_counter
         self.pos: np.ndarray = np.array(pos, dtype=float)
         self.vel: np.ndarray = np.array(vel, dtype=float)
@@ -97,12 +99,12 @@ class PhysicsObject:
         self.age += dt
 
         # Destroy objects that are too old or fell off the world
-        if self.pos[1] < config.WORLD_KILL_DEPTH or self.age > config.OBJECT_LIFETIME:
+        if self.pos[1] < self.config.gameplay.world_kill_depth or self.age > self.config.gameplay.object_lifetime:
             self.alive = False
             return
 
         # Apply gravity
-        self.vel[1] += config.GRAVITY * dt
+        self.vel[1] += self.config.physics.gravity * dt
 
         # Update position
         self.pos += self.vel * dt
@@ -117,7 +119,7 @@ class PhysicsObject:
 
         # Ground collision
         self.pos, self.vel, self.on_ground = resolve_ground_collision(
-            self.pos, self.vel, self.size
+            self.config, self.pos, self.vel, self.size
         )
 
         # Sphere-sphere collisions
@@ -144,7 +146,7 @@ class PhysicsObject:
             if is_colliding and normal is not None and penetration is not None:
                 # Resolve collision
                 new_pos1, new_vel1, new_pos2, new_vel2 = resolve_sphere_sphere_collision(
-                    self.pos, self.vel, self.mass,
+                    self.config, self.pos, self.vel, self.mass,
                     other.pos, other.vel, other.mass,
                     normal, penetration
                 )

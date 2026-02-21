@@ -38,9 +38,9 @@ class Player:
         """
         self.config = config
         if position is None:
-            position = (0.0, config.player.height, 5.0)
+            position = (0.0, self.config.player.height, 5.0)
 
-        self.camera: Camera = Camera(position=position, yaw=yaw, pitch=0.0)
+        self.camera: Camera = Camera(self.config, position=position, yaw=yaw, pitch=0.0)
         self.velocity: np.ndarray = np.zeros(3, dtype=float)
         self.on_ground: bool = False
 
@@ -63,8 +63,8 @@ class Player:
             dy: Mouse Y movement in pixels
         """
         self.camera.rotate(
-            dx * config.MOUSE_SENSITIVITY,
-            dy * config.MOUSE_SENSITIVITY
+            dx * self.config.camera.mouse_sensitivity,
+            dy * self.config.camera.mouse_sensitivity
         )
 
     def update(self, dt: float, keys_pressed) -> None:
@@ -83,12 +83,12 @@ class Player:
         self.velocity[2] = movement[2]
 
         # Apply gravity
-        self.velocity[1] += config.GRAVITY * dt
+        self.velocity[1] += self.config.physics.gravity * dt
 
         # Handle jump - support both dict and array
         jump_pressed = self._get_key_state(keys_pressed, pygame.K_SPACE)
         if jump_pressed and self.on_ground:
-            self.velocity[1] = config.JUMP_SPEED
+            self.velocity[1] = self.config.player.jump_speed
             self.on_ground = False
 
         # Update position
@@ -147,13 +147,13 @@ class Player:
 
         # Normalize and scale
         if np.linalg.norm(movement) > 0:
-            movement = normalize(movement) * config.PLAYER_SPEED
+            movement = normalize(movement) * self.config.player.speed
 
         return movement
 
     def _handle_ground_collision(self) -> None:
         """Handle collision with ground plane."""
-        floor_level = config.GROUND_LEVEL + config.PLAYER_HEIGHT
+        floor_level = self.config.world.ground_level + self.config.player.height
 
         if self.position[1] <= floor_level:
             self.position[1] = floor_level
@@ -172,7 +172,7 @@ class Player:
         """
         forward = self.camera.forward
         spawn_pos = self.position + forward * 1.2
-        velocity = forward * config.SHOOT_SPEED
+        velocity = forward * self.config.gameplay.shoot_speed
         return spawn_pos, velocity
 
     def get_crosshair_target(self, distance: float = None) -> np.ndarray:
@@ -186,17 +186,17 @@ class Player:
             Target position [x, y, z]
         """
         if distance is None:
-            distance = config.CrateConfig.spawn_distance
+            distance = self.config.crate.spawn_distance
 
         forward = self.camera.forward
         target = self.position + forward * distance
         # Clamp to ground level minimum
-        target[1] = max(target[1], config.GROUND_LEVEL + 0.5)
+        target[1] = max(target[1], self.config.world.ground_level + 0.5)
         return target
 
     def reset(self) -> None:
         """Reset player to starting position and state."""
-        self.position[:] = [0.0, config.PLAYER_HEIGHT, 5.0]
+        self.position[:] = [0.0, self.config.player.height, 5.0]
         self.velocity[:] = 0.0
         self.camera.yaw = 0.0
         self.camera.pitch = 0.0

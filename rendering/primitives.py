@@ -26,9 +26,9 @@ def draw_sphere(
         stacks: Number of subdivisions along Z-axis
     """
     if slices is None:
-        slices = config.SphereConfig.slices
+        slices = config.sphere.slices
     if stacks is None:
-        stacks = config.SphereConfig.stacks
+        stacks = config.sphere.stacks
 
     quadric = gluNewQuadric()
     gluQuadricNormals(quadric, GLU_SMOOTH)
@@ -124,7 +124,7 @@ def draw_ground(
         grid_color = config.environment_colors.grid_color
 
 
-    ground_y = config.GROUND_LEVEL
+    ground_y = config.world.ground_level
 
     # Draw ground plane
     glDisable(GL_LIGHTING)
@@ -156,6 +156,7 @@ def draw_ground(
 
 
 def draw_skybox(
+    config: GameConfig,
     horizon_color: Tuple[float, float, float] | None = None,
     zenith_color: Tuple[float, float, float] | None = None
 ) -> None:
@@ -167,9 +168,9 @@ def draw_skybox(
         zenith_color: RGB color at zenith (top of sky)
     """
     if horizon_color is None:
-        horizon_color = config.EnvironmentColorConfig.sky_horizon_color
+        horizon_color = config.environment_colors.sky_horizon_color
     if zenith_color is None:
-        zenith_color = config.EnvironmentColorConfig.sky_zenith_color
+        zenith_color = config.environment_colors.sky_zenith_color
 
     glDisable(GL_LIGHTING)
     glDisable(GL_DEPTH_TEST)

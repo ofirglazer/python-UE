@@ -9,7 +9,7 @@ import numpy as np
 import math
 from OpenGL.GL import glRotatef, glTranslatef
 from utils.math_utils import clamp
-import config
+from config import GameConfig
 
 
 class Camera:
@@ -24,6 +24,7 @@ class Camera:
 
     def __init__(
         self,
+        config: GameConfig,
         position: tuple[float, float, float] = (0.0, 0.0, 0.0),
         yaw: float = 0.0,
         pitch: float = 0.0
@@ -36,6 +37,7 @@ class Camera:
             yaw: Initial horizontal rotation (degrees)
             pitch: Initial vertical rotation (degrees)
         """
+        self.config = config
         self.position: np.ndarray = np.array(position, dtype=float)
         self.yaw: float = yaw
         self.pitch: float = pitch
@@ -93,8 +95,8 @@ class Camera:
         self.yaw += delta_yaw
         self.pitch = clamp(
             self.pitch + delta_pitch,
-            -config.PITCH_LIMIT,
-            config.PITCH_LIMIT
+            -self.config.camera.pitch_limit,
+            self.config.camera.pitch_limit
         )
 
     def apply_to_opengl(self) -> None:
