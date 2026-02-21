@@ -6,9 +6,11 @@ This module handles player physics, movement, and input processing.
 
 import numpy as np
 import pygame
+
+import config
 from core.camera import Camera
 from utils.math_utils import normalize
-import config
+from config import GameConfig
 
 
 class Player:
@@ -23,7 +25,8 @@ class Player:
 
     def __init__(
         self,
-        position: tuple[float, float, float] = (0.0, config.PLAYER_HEIGHT, 5.0),
+        config: GameConfig,
+        position: tuple[float, float, float] | None = None,
         yaw: float = 0.0
     ):
         """
@@ -32,7 +35,12 @@ class Player:
         Args:
             position: Starting position [x, y, z]
             yaw: Starting horizontal rotation (degrees)
+            config: configuration dataclass
         """
+        self.config = config
+        if position is None:
+            position = (0.0, config.player.height, 5.0)
+
         self.camera: Camera = Camera(position=position, yaw=yaw, pitch=0.0)
         self.velocity: np.ndarray = np.zeros(3, dtype=float)
         self.on_ground: bool = False
@@ -168,7 +176,7 @@ class Player:
         velocity = forward * config.SHOOT_SPEED
         return spawn_pos, velocity
 
-    def get_crosshair_target(self, distance: float = config.CRATE_SPAWN_DISTANCE) -> np.ndarray:
+    def get_crosshair_target(self, distance: float = None) -> np.ndarray:
         """
         Calculate target position at crosshair.
 
@@ -178,6 +186,9 @@ class Player:
         Returns:
             Target position [x, y, z]
         """
+        if distance is None:
+            distance = config.CrateConfig.spawn_distance
+
         forward = self.camera.forward
         target = self.position + forward * distance
         # Clamp to ground level minimum

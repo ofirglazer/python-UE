@@ -23,7 +23,7 @@ from rendering import (
     setup_lighting,
     HUD,
 )
-import config
+from config import GameConfig
 
 
 class GameEngine:
@@ -43,8 +43,9 @@ class GameEngine:
         fps_display: Current displayed FPS value
     """
 
-    def __init__(self):
+    def __init__(self, config: GameConfig) -> None:
         """Initialize the game engine and all subsystems."""
+        self.config = config
         self.running: bool = False
         self.clock: pygame.time.Clock = pygame.time.Clock()
         self.last_time: float = 0.0
